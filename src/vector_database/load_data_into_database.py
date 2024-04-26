@@ -1,5 +1,6 @@
 import chromadb
 import pandas as pd
+
 from src.constants.paths import RESEARCH_PAPER_DATA
 from src.constants.parameters import VECTOR_DATABASE_NAME
 
@@ -25,4 +26,6 @@ def load_data_into_database(df):
 
 if __name__ == "__main__":
     research_paper_df = pd.read_csv(RESEARCH_PAPER_DATA)
+    print("Loading data into database")
     load_data_into_database(research_paper_df)
+    print("Loading complete!")
