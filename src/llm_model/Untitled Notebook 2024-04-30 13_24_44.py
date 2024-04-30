@@ -50,23 +50,16 @@ collection.add(
 
 # COMMAND ----------
 
-from transformers import BertConfig, BertModel, BertTokenizer
-
-# Initializing a BERT google-bert/bert-base-uncased style configuration
-configuration = BertConfig()
-
-# Initializing a model (with random weights) from the google-bert/bert-base-uncased style configuration
-model = BertModel(configuration)
-
-# Accessing the model configuration
-configuration = model.config
-
-# COMMAND ----------
-
 from langchain.vectorstores import Chroma
-#from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
+from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain_community.embeddings.sentence_transformer import (
     SentenceTransformerEmbeddings,
+)
+API = "GVg1Zi8GrX7bSOhk4pgzrOOqLrvbTBR6"
+# create the open-source embedding function
+embedding_function = OpenAIEmbeddings(
+    api_key=API,
+    base_url="https://api.lemonfox.ai/v1"
 )
 
 # create the open-source embedding function
@@ -81,102 +74,66 @@ print(chroma_db.similarity_search(query))
 
 # COMMAND ----------
 
-!pip install -U sentence-transformers
-
-# COMMAND ----------
-
-model_names = ['dbrx_instruct']
-dbutils.widgets.dropdown("model_name", model_names[0], model_names)
-
-
-# COMMAND ----------
-
-# Default catalog name when installing the model from Databricks Marketplace.
-# Replace with the name of the catalog containing this model
-catalog_name = "databricks_dbrx_models"
-
-# You should specify the newest model version to load for inference
-version = "1"
-model_name = dbutils.widgets.get("model_name")
-model_uc_path = f"{catalog_name}.models.{model_name}"
-endpoint_name = f'{model_name}_marketplace'
-
-# Minimum desired provisioned throughput
-min_provisioned_throughput = 500
-
-# Maximum desired provisioned throughput
-max_provisioned_throughput = 1000
-
-# COMMAND ----------
-
-import requests
-import json
-
-# Get the API endpoint and token for the current notebook context
-API_ROOT = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiUrl().get()
-API_TOKEN = dbutils.notebook.entry_point.getDbutils().notebook().getContext().apiToken().get()
-
-# COMMAND ----------
-
-API_TOKEN
-
-# COMMAND ----------
-
-from huggingface_hub import login
-login()
-
-# COMMAND ----------
-
-from sentence_transformers import SentenceTransformer
-from langchain_core.runnables.base import Runnable
+from langchain.chat_models import ChatOpenAI
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModel
 import torch
 
-access_token = "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"
-# tokenizer = AutoTokenizer.from_pretrained("databricks/dbrx-instruct", token=access_token)
-# model = AutoModelForCausalLM.from_pretrained("databricks/dbrx-instruct", device_map="auto", torch_dtype=torch.bfloat16, token=access_token)
+API = "GVg1Zi8GrX7bSOhk4pgzrOOqLrvbTBR6"
+model = ChatOpenAI(
+    api_key=API,
+    base_url="https://api.lemonfox.ai/v1"
+)
 
-# model = AutoModel.from_pretrained("databricks/dbrx-instruct", token=access_token)
-
-from langchain.llms import Databricks
-from langchain_core.messages import HumanMessage, SystemMessage
-
-
-
-llm_model = Databricks(endpoint_name="databricks-dbrx-instruct")
-
-chain = RetrievalQA.from_chain_type(llm=llm_model,
+chain = RetrievalQA.from_chain_type(llm=model,
                                     chain_type="stuff",
                                     retriever=chroma_db.as_retriever())
 
 # COMMAND ----------
 
-response = chain("Can you tell me any research about methamphetamine?")
+response = chain("Can you tell me where I should focus my research into heart conditons given I am looking for a PhD topic?")
 
 # COMMAND ----------
 
-db_rec = langchainChroma.get()
+response
 
 # COMMAND ----------
 
-!pip install --upgrade transformers
-
-# COMMAND ----------
-
-from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
-tokenizer = AutoTokenizer.from_pretrained("databricks/dbrx-instruct", token=access_token)
-model = AutoModelForCausalLM.from_pretrained("databricks/dbrx-instruct", device_map="auto", torch_dtype=torch.bfloat16, token=access_token)
+torch.random.manual_seed(0)
 
-input_text = "What does it take to build a great LLM?"
-messages = [{"role": "user", "content": input_text}]
-input_ids = tokenizer.apply_chat_template(messages, return_dict=True, tokenize=True, add_generation_prompt=True, return_tensors="pt").to("cuda")
+model = AutoModelForCausalLM.from_pretrained(
+    "microsoft/Phi-3-mini-128k-instruct", 
+    device_map="cuda", 
+    torch_dtype="auto", 
+    trust_remote_code=True, 
+)
+tokenizer = AutoTokenizer.from_pretrained("microsoft/Phi-3-mini-128k-instruct")
 
-outputs = model.generate(**input_ids, max_new_tokens=200)
-print(tokenizer.decode(outputs[0]))
+messages = [
+    {"role": "user", "content": "Can you provide ways to eat combinations of bananas and dragonfruits?"},
+    {"role": "assistant", "content": "Sure! Here are some ways to eat bananas and dragonfruits together: 1. Banana and dragonfruit smoothie: Blend bananas and dragonfruits together with some milk and honey. 2. Banana and dragonfruit salad: Mix sliced bananas and dragonfruits together with some lemon juice and honey."},
+    {"role": "user", "content": "What about solving an 2x + 3 = 7 equation?"},
+]
+
+pipe = pipeline("text-generation", model=model,tokenizer=tokenizer,)
+
+generation_args = {
+    "max_new_tokens": 500,
+    "return_full_text": False,
+    "temperature": 0.0,
+    "do_sample": False,
+}
+
+output = pipe(messages, **generation_args)
+print(output[0]['generated_text'])
 
 
 # COMMAND ----------
 
+!pip install flash-attention
 
+# COMMAND ----------
+
+!wget "https://huggingface.co/jartine/llava-v1.5-7B-GGUF/resolve/main/llava-v1.5-7b-q4.llamafile?download=true"
