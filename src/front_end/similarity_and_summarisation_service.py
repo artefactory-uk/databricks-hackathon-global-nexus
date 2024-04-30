@@ -30,6 +30,7 @@ def retrieve_similar_docs_and_summarisation_from_query(query_text: str):
 def summarise_relevant_documents(similar_docs: pd.DataFrame):
     # LLM summarisation code here
     summarised_text = "Summarised text"
+
     return summarised_text
 
 
@@ -45,6 +46,7 @@ def launch_similarity_and_summarisation_service():
             button = gr.Button("Submit", variant="primary")
         with gr.Column():
             output_summary = gr.Textbox(label="Summary:")
+            # output_summary = gr.List(type="pandas", label="Summarisation:")
             output = gr.List(type="pandas", label="Relevant documents:")
 
         button.click(
