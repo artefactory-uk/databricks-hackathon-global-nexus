@@ -1,5 +1,6 @@
 import gradio as gr
 import pandas as pd
+from typing import Any
 from langchain.chains import RetrievalQA
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings.sentence_transformer import (
@@ -33,10 +34,18 @@ def _abstract_summarisation(relevant_docs_df: pd.DataFrame) -> pd.DataFrame:
     return relevant_docs_df
 
 
-def _create_similar_results_dataframe(results: list) -> pd.DataFrame:
-    doc_titles = [results[i].metadata["title"] for i in range(len(results))]
-    doc_urls = [results[i].metadata["url"] for i in range(len(results))]
-    doc_abstracts = [results[i].metadata["abstract"] for i in range(len(results))]
+def _extract_metadata(results: list[Any], metadata_type: str) -> list[Any]:
+    length_results_list = len(results)
+    doc_property = [
+        results[index].metadata[metadata_type] for index in range(length_results_list)
+    ]
+    return doc_property
+
+
+def _create_similar_results_dataframe(results: list[Any]) -> pd.DataFrame:
+    doc_titles = _extract_metadata(results, "title")
+    doc_urls = _extract_metadata(results, "url")
+    doc_abstracts = _extract_metadata(results, "abstract")
     similar_docs_df = pd.DataFrame(
         {
             "Document Title": doc_titles,
