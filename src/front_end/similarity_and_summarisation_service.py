@@ -11,11 +11,11 @@ from transformers import pipeline
 from dotenv import load_dotenv
 import os
 from src.constants.paths import VECTOR_DATABASE_PATH
-from src.constants.parameters import VECTOR_DATABASE_NAME
-
-load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-BASE_URL = os.getenv("BASE_URL")
+from src.constants.parameters import (
+    VECTOR_DATABASE_NAME,
+    SUMMARISATION_MODEL,
+    NUMBER_OF_SIMILAR_DOCUMENTS_TO_RETRIEVE,
+)
 
 
 def _load_langchain_chroma_vector_database() -> Chroma:
@@ -29,7 +29,7 @@ def _load_langchain_chroma_vector_database() -> Chroma:
 
 
 def _abstract_summarisation(relevant_docs_df: pd.DataFrame) -> pd.DataFrame:
-    summariser = pipeline("summarization", model="Falconsai/text_summarization")
+    summariser = pipeline("summarization", model=SUMMARISATION_MODEL)
     relevant_docs_df["Summary"] = relevant_docs_df["Abstract"].apply(summariser)
     return relevant_docs_df
 
@@ -85,7 +85,9 @@ def retrieve_similar_docs_and_summarisation_from_query(
     query_text: str,
 ) -> tuple[pd.DataFrame, str, str]:
     chroma_db = _load_langchain_chroma_vector_database()
-    results = chroma_db.similarity_search(query_text, k=5)
+    results = chroma_db.similarity_search(
+        query_text, k=NUMBER_OF_SIMILAR_DOCUMENTS_TO_RETRIEVE
+    )
     llm_chat_response = get_langchain_chat_model_response_from_query(
         query_text, chroma_db
     )
@@ -121,4 +123,7 @@ def launch_similarity_and_summarisation_service():
 
 
 if __name__ == "__main__":
+    load_dotenv()
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    BASE_URL = os.getenv("BASE_URL")
     launch_similarity_and_summarisation_service()
