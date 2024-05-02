@@ -13,13 +13,14 @@ import os
 from src.constants.paths import VECTOR_DATABASE_PATH
 from src.constants.parameters import (
     VECTOR_DATABASE_NAME,
+    EMBEDDING_MODEL,
     SUMMARISATION_MODEL,
     NUMBER_OF_SIMILAR_DOCUMENTS_TO_RETRIEVE,
 )
 
 
 def _load_langchain_chroma_vector_database() -> Chroma:
-    embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    embedding_function = SentenceTransformerEmbeddings(model_name=EMBEDDING_MODEL)
     chroma_db = Chroma(
         persist_directory=VECTOR_DATABASE_PATH,
         embedding_function=embedding_function,
