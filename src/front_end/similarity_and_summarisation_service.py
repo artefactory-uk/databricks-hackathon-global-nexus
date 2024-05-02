@@ -98,7 +98,6 @@ def launch_similarity_and_summarisation_service():
         with gr.Column():
             output_chat = gr.Textbox(label="Chat response:")
             output_summary = gr.Textbox(label="Summarisation:")
-            # output_summary = gr.List(type="pandas", label="Summarisation:")
             output_relevant_docs = gr.List(type="pandas", label="Relevant documents:")
 
         button.click(
