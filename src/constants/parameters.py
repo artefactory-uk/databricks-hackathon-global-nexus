@@ -1,1 +1,1 @@
-VECTOR_DATABASE_NAME = "vector_database"
+VECTOR_DATABASE_NAME = "langchain_database"
