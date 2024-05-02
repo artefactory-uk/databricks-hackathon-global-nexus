@@ -23,49 +23,52 @@ papers_df.head()
 from langchain.chains import RetrievalQA
 from langchain.vectorstores import Chroma
 from langchain.chat_models import ChatOpenAI
-from langchain.document_loaders import PyPDFLoader
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain_community.embeddings.sentence_transformer import (
-    SentenceTransformerEmbeddings,
-)
 import chromadb
 
 chroma_client = chromadb.Client()
 chroma_client = chromadb.PersistentClient(
-        path="src/vector_database/chroma_data_langchain_test",
+        path="src/data/chroma_vector_database",
          )
 
 
 # COMMAND ----------
 
-collection = chroma_client.get_collection("langchain_database")
-# collection = chroma_client.create_collection("langchain_database")
+collection = chroma_client.get_collection("medical_research_papers")
+# collection = chroma_client.create_collection("medical_research_papers")
 
 # COMMAND ----------
 
 collection.add(
-    documents=[row["PAPER_TITLE"] + row["PAPER_ABSTRACT"] for idx, row in papers_df.iterrows()], 
+    documents=[row["PAPER_TITLE"] + " " + row["PAPER_ABSTRACT"] for idx, row in papers_df.iterrows()], 
     ids=[row["PAPER_LINK"] for idx, row in papers_df.iterrows()], 
+    metadatas=[
+        {
+            "title": row["PAPER_TITLE"],
+            "abstract": row["PAPER_ABSTRACT"],
+            "url": row["PAPER_LINK"], 
+            } 
+        for _, row in papers_df.iterrows()
+        ]
 )
 
 # COMMAND ----------
 
 from langchain.vectorstores import Chroma
-from langchain.embeddings.openai import OpenAIEmbeddings
+# from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain_community.embeddings.sentence_transformer import (
     SentenceTransformerEmbeddings,
 )
-API = "GVg1Zi8GrX7bSOhk4pgzrOOqLrvbTBR6"
-# create the open-source embedding function
-embedding_function = OpenAIEmbeddings(
-    api_key=API,
-    base_url="https://api.lemonfox.ai/v1"
-)
+API = os.getenv("OPENAI_API_KEY")
+# create the open-source embedding function, lemonfox does not support openai embeddings 
+# embedding_function = OpenAIEmbeddings(
+#     api_key=API,
+#     base_url="https://api.lemonfox.ai/v1"
+# )
 
 # create the open-source embedding function
 embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
-chroma_db = Chroma(persist_directory="src/vector_database/chroma_data_langchain_test", embedding_function=embedding_function, collection_name="langchain_database")
+chroma_db = Chroma(persist_directory="src/data/chroma_vector_database", embedding_function=embedding_function, collection_name="medical_research_papers")
 
 # COMMAND ----------
 
@@ -75,10 +78,8 @@ print(chroma_db.similarity_search(query))
 # COMMAND ----------
 
 from langchain.chat_models import ChatOpenAI
-from transformers import AutoTokenizer, AutoModelForCausalLM, AutoModel
-import torch
 
-API = "GVg1Zi8GrX7bSOhk4pgzrOOqLrvbTBR6"
+API = os.getenv("OPENAI_API_KEY")
 model = ChatOpenAI(
     api_key=API,
     base_url="https://api.lemonfox.ai/v1"
@@ -129,11 +130,3 @@ generation_args = {
 output = pipe(messages, **generation_args)
 print(output[0]['generated_text'])
 
-
-# COMMAND ----------
-
-!pip install flash-attention
-
-# COMMAND ----------
-
-!wget "https://huggingface.co/jartine/llava-v1.5-7B-GGUF/resolve/main/llava-v1.5-7b-q4.llamafile?download=true"
