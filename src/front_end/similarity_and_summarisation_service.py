@@ -17,7 +17,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 BASE_URL = os.getenv("BASE_URL")
 
 
-def _load_langchain_chroma_vector_database():
+def _load_langchain_chroma_vector_database() -> Chroma:
     embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
     chroma_db = Chroma(
         persist_directory=VECTOR_DATABASE_PATH,
@@ -33,7 +33,7 @@ def _abstract_summarisation(relevant_docs_df: pd.DataFrame) -> pd.DataFrame:
     return relevant_docs_df
 
 
-def _create_similar_results_dataframe(results: list):
+def _create_similar_results_dataframe(results: list) -> pd.DataFrame:
     doc_titles = [results[i].metadata["title"] for i in range(len(results))]
     doc_urls = [results[i].metadata["url"] for i in range(len(results))]
     doc_abstracts = [results[i].metadata["abstract"] for i in range(len(results))]
@@ -72,7 +72,9 @@ def get_langchain_chat_model_response_from_query(
     return response
 
 
-def retrieve_similar_docs_and_summarisation_from_query(query_text: str):
+def retrieve_similar_docs_and_summarisation_from_query(
+    query_text: str,
+) -> tuple[pd.DataFrame, str, str]:
     chroma_db = _load_langchain_chroma_vector_database()
     results = chroma_db.similarity_search(query_text, k=5)
     llm_chat_response = get_langchain_chat_model_response_from_query(
