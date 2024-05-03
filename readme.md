@@ -1,4 +1,6 @@
-# Title
+# Global Nexus Hackathon
+This repo contains our submission to the DataBricks Gen AI Hackathon.
+The use case selected is Healthcare. We aim to create a more efficient way for researchers to quickly retrieve, understand and query research papers so they can do their literature review. We have used a RAG to provide context to the LLM
 
 ## When you first close this repo run the following commands to properly initialise your local development environment
 Create you local virtual environment (change python version as required):
