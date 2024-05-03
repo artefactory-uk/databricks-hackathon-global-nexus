@@ -12,9 +12,9 @@ Always activate and work only from the virtual environment:
 source _venv/bin/activate
 ```
 Install pre-commit hooks:
-
+```
 pre-commit install
-
+```
 ## Default requirements
 The requirements.txt file contains default requirements which are often relevant to data repository work.
 
