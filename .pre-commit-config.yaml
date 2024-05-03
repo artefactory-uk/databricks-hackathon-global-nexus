@@ -3,8 +3,9 @@ repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v2.3.0
   hooks:
-    # Non modifying hooks
+      # Non modifying hooks
   - id: check-added-large-files
+    args: [--maxkb=1024]
   - id: check-yaml
   - id: check-ast
   - id: check-builtin-literals
@@ -16,7 +17,7 @@ repos:
   - id: check-merge-conflict
   - id: debug-statements
   - id: detect-private-key
-    # Modifying hooks
+        # Modifying hooks
   - id: requirements-txt-fixer
   - id: end-of-file-fixer
   - id: trailing-whitespace
@@ -35,19 +36,19 @@ repos:
 - repo: https://github.com/pre-commit/pygrep-hooks
   rev: v1.9.0
   hooks:
-  # Had to take out because of tensorflow
-  # - id: python-no-eval
+      # Had to take out because of tensorflow
+      # - id: python-no-eval
   - id: python-no-log-warn
 
-# Update the version of python as necessary per project
-# Try to use the latest python if possible
+  # Update the version of python as necessary per project
+  # Try to use the latest python if possible
 - repo: https://github.com/asottile/pyupgrade
   rev: v2.32.1
   hooks:
   - id: pyupgrade
     args: [--py38-plus]
 
-# Keep last to ensure formatting happens after all other fixes
+  # Keep last to ensure formatting happens after all other fixes
 - repo: https://github.com/psf/black
   rev: 22.3.0
   hooks:
