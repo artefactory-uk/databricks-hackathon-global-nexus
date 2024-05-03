@@ -86,6 +86,7 @@ def retrieve_similar_docs_and_summarisation_from_query(
     query_text: str,
 ) -> tuple[pd.DataFrame, str, str]:
     chroma_db = _load_langchain_chroma_vector_database()
+    # Get results from langchain chain response in get_langchain_chat_model_response_from_query
     results = chroma_db.similarity_search(
         query_text, k=NUMBER_OF_SIMILAR_DOCUMENTS_TO_RETRIEVE
     )
