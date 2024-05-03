@@ -2,3 +2,7 @@ _venv
 .vscode
 *.pyc
 .env
+.DS_Store
+*.bin
+*.pickle
+*.csv
