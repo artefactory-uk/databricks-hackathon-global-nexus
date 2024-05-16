@@ -1,7 +1,27 @@
 import gradio as gr
+import pandas as pd
+
+
+
+
 
 
 def header(callback_function: callable) -> gr.Blocks:
+    css = """
+    <style>
+    table.dataframe {
+        width: 100%;
+    }
+    table.dataframe td, table.dataframe th {
+        border: 1px solid #000;
+        padding: 8px;
+        word-wrap: break-word;
+        max-width: 150px; /* Adjust the max-width as per your requirement */
+    }
+    </style>
+    """
+
+
     with gr.Blocks(
         theme=gr.themes.Default(
             primary_hue=gr.themes.colors.teal, secondary_hue=gr.themes.colors.cyan
@@ -11,21 +31,31 @@ def header(callback_function: callable) -> gr.Blocks:
         gr.HTML("<img src='file/src/front_end/assets/background.png'>")
         gr.Markdown(
             """
-            # Retreive relevant research papers to your query
+            # Retrieve relevant research papers to your query
             """
         )
         textbox = gr.Textbox(label="Please enter your question:")
+
+        
+        dropdown =gr.Dropdown(["Number of Participants", "Phase I Success Rate","Advantages/Disadvantages", "Study Type"], value=["Number of Participants"], multiselect=True, label="Activity", info="XXX")
+        
         with gr.Row():
-            button = gr.Button("Submit", variant="primary")
+            button1 = gr.Button("Submit", variant="primary")
+            
         with gr.Column():
             output_chat = gr.Textbox(label="Chat response:")
             output_summary = gr.Textbox(label="Summarisation:")
+            
             output_relevant_docs = gr.List(type="pandas", label="Relevant documents:")
+        
+        gr.HTML(css)
 
-        button.click(
+        button1.click(
             callback_function,
-            textbox,
+            inputs = [textbox, dropdown],
             outputs=[output_relevant_docs, output_chat, output_summary],
+        
         )
+
 
     return front_end

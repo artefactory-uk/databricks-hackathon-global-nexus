@@ -6,16 +6,15 @@ from src.front_end.callbacks.callbacks import (
 )
 
 
-def callback_function(query_text: str) -> tuple:
+def callback_function(query_text: str, dropdown_selection: list) -> tuple:
     return retrieve_similar_docs_and_summarisation_from_query(
-        query_text, OPENAI_API_KEY, BASE_URL
+        query_text, dropdown_selection, OPENAI_API_KEY, BASE_URL
     )
 
 
 def launch_similarity_and_summarisation_service():
-    front_end = header(callback_function=callback_function)
-    front_end.launch(allowed_paths=["."])
-
+    demo= header(callback_function=callback_function)
+    demo.launch(allowed_paths=["."])
 
 if __name__ == "__main__":
     load_dotenv()

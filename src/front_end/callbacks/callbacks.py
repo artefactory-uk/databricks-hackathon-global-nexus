@@ -1,5 +1,6 @@
 import gradio as gr
 import pandas as pd
+import random
 from typing import Any
 from langchain.chains import RetrievalQA
 from langchain_community.vectorstores import Chroma
@@ -43,7 +44,7 @@ def _extract_metadata(results: list[Any], metadata_type: str) -> list[Any]:
     return doc_property
 
 
-def _create_similar_results_dataframe(results: list[Any]) -> pd.DataFrame:
+def _create_similar_results_dataframe(results: list[Any], selected_options) -> pd.DataFrame:
     doc_titles = _extract_metadata(results, "title")
     doc_urls = _extract_metadata(results, "url")
     doc_abstracts = _extract_metadata(results, "abstract")
@@ -51,10 +52,46 @@ def _create_similar_results_dataframe(results: list[Any]) -> pd.DataFrame:
         {
             "Document Title": doc_titles,
             "Link": doc_urls,
-            "Abstract": doc_abstracts,
+            "Abstract": doc_abstracts
         }
     )
-    return similar_docs_df
+    additional_columns = _generate_demo_fields()
+    print(additional_columns)
+    print(type(additional_columns))
+    try:
+        selected_columns = additional_columns[selected_options]
+    except KeyError:
+        selected_columns = additional_columns
+    print(selected_columns)
+    similar_docs_df_complete = pd.concat([similar_docs_df, selected_columns], axis=1)
+    return similar_docs_df_complete
+
+
+
+def _generate_demo_fields():
+
+    #1 for numbber of participants
+    num_participants = [random.randint(20, 80) for _ in range(5)]
+    #2 for phase I success rate
+    phase_I_success_rate = [random.randint(20, 100) for _ in range(5)]
+    #3 for Type of the study
+    study_type = ["Radomized", "Radomized", "Non-Radomized", "Non-Radomized", "Post-approval study"]
+    #4 advantages/ disadvantages
+    advantages_disadv = ["The placebo arm does not receive the trial drug, so may not get the benefit of it",
+                         "Avoids participant bias in treatment and requires a small sample size. This design is not suitable for research on acute diseases.",
+                         "The study design is complex",
+                         "The study uses a placebo to understand the efficacy of a drug in treating the disease",
+                         "Less variability"]
+    generated_data = pd.DataFrame(
+        {
+            "Number of Participants": num_participants,
+            "Phase I Success Rate": phase_I_success_rate,
+            "Study Type": study_type,
+            "Advantages/Disadvantages": advantages_disadv
+        }
+    )
+    return generated_data
+
 
 
 def _summarise_relevant_documents(similar_docs_df: pd.DataFrame) -> str:
@@ -83,7 +120,7 @@ def get_langchain_chat_model_response_from_query(
 
 
 def retrieve_similar_docs_and_summarisation_from_query(
-    query_text: str, api_key: str, base_url: str
+    query_text: str,  dropdown_selection:list, api_key: str, base_url: str
 ) -> tuple[pd.DataFrame, str, str]:
     chroma_db = _load_langchain_chroma_vector_database()
     # Get results from langchain chain response in get_langchain_chat_model_response_from_query
@@ -93,7 +130,12 @@ def retrieve_similar_docs_and_summarisation_from_query(
     llm_chat_response = get_langchain_chat_model_response_from_query(
         query_text, chroma_db, api_key, base_url
     )
-    similar_docs_df = _create_similar_results_dataframe(results)
+    similar_docs_df = _create_similar_results_dataframe(results, dropdown_selection)
+
+    #TO DO update pandas dataframe 
     relevant_docs_summary = _summarise_relevant_documents(similar_docs_df)
-    similar_docs_snippet = similar_docs_df[["Document Title", "Link"]]
+    final_columns = ["Document Title", "Link"] + dropdown_selection
+    
+    similar_docs_snippet = similar_docs_df[final_columns]
+    
     return similar_docs_snippet, llm_chat_response, relevant_docs_summary
