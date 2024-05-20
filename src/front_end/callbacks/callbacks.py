@@ -48,48 +48,61 @@ def _create_similar_results_dataframe(results: list[Any], selected_options) -> p
     doc_titles = _extract_metadata(results, "title")
     doc_urls = _extract_metadata(results, "url")
     doc_abstracts = _extract_metadata(results, "abstract")
-    similar_docs_df = pd.DataFrame(
-        {
+    similar_docs_df = {
             "Document Title": doc_titles,
             "Link": doc_urls,
             "Abstract": doc_abstracts
         }
-    )
     additional_columns = _generate_demo_fields()
-    print(additional_columns)
-    print(type(additional_columns))
-    try:
-        selected_columns = additional_columns[selected_options]
-    except KeyError:
-        selected_columns = additional_columns
-    print(selected_columns)
-    similar_docs_df_complete = pd.concat([similar_docs_df, selected_columns], axis=1)
+    i =0
+    while i < len(selected_options):
+        similar_docs_df[selected_options[i]] = additional_columns[i]
+        i +=1
+
+    #try:
+    #    selected_columns = additional_columns[selected_options]
+    #except KeyError:
+    #    selected_columns = additional_columns
+    print(similar_docs_df)
+    similar_docs_df_complete = pd.DataFrame(similar_docs_df)
+    #similar_docs_df_complete = pd.concat([similar_docs_df, additional_columns], axis=1)
     return similar_docs_df_complete
 
 
 
 def _generate_demo_fields():
 
-    #1 for numbber of participants
-    num_participants = [random.randint(20, 80) for _ in range(5)]
-    #2 for phase I success rate
-    phase_I_success_rate = [random.randint(20, 100) for _ in range(5)]
-    #3 for Type of the study
-    study_type = ["Radomized", "Radomized", "Non-Radomized", "Non-Radomized", "Post-approval study"]
-    #4 advantages/ disadvantages
-    advantages_disadv = ["The placebo arm does not receive the trial drug, so may not get the benefit of it",
+    generated_data = dict()
+    
+    generated_data[0] = [random.randint(20, 80) for _ in range(5)]
+    generated_data[1]= ["Radomized", "Radomized", "Non-Radomized", "Non-Radomized", "Post-approval study"]
+    generated_data[2] = ["The placebo arm does not receive the trial drug, so may not get the benefit of it",
                          "Avoids participant bias in treatment and requires a small sample size. This design is not suitable for research on acute diseases.",
                          "The study design is complex",
                          "The study uses a placebo to understand the efficacy of a drug in treating the disease",
                          "Less variability"]
-    generated_data = pd.DataFrame(
-        {
-            "Number of Participants": num_participants,
-            "Phase I Success Rate": phase_I_success_rate,
-            "Study Type": study_type,
-            "Advantages/Disadvantages": advantages_disadv
-        }
-    )
+    generated_data[3] = ["55%", "60%", "70%", "80%", "90%"]
+
+    ##1 for numbber of participants
+    #num_participants = [random.randint(20, 80) for _ in range(5)]
+    ##2 for phase I success rate
+    #phase_I_success_rate = [random.randint(20, 100) for _ in range(5)]
+    ##3 for Type of the study
+    #study_type = ["Radomized", "Radomized", "Non-Radomized", "Non-Radomized", "Post-approval study"]
+    ##4 advantages/ disadvantages
+    #advantages_disadv = ["The placebo arm does not receive the trial drug, so may not get the benefit of it",
+    #                     "Avoids participant bias in treatment and requires a small sample size. This design is not suitable for research on acute diseases.",
+    #                     "The study design is complex",
+    #                     "The study uses a placebo to understand the efficacy of a drug in treating the disease",
+    #                     "Less variability"]
+    #generated_data = pd.DataFrame(
+    #    {
+    #        "Number of Participants": num_participants,
+    #        "Phase I Success Rate": phase_I_success_rate,
+    #        "Study Type": study_type,
+    #        "Advantages/Disadvantages": advantages_disadv
+    #    }
+    #)
     return generated_data
 
 

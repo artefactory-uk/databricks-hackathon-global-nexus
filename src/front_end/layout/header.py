@@ -7,8 +7,7 @@ import pandas as pd
 
 
 def header(callback_function: callable) -> gr.Blocks:
-    css = """
-    <style>
+    css = """ <style>
     table.dataframe {
         width: 100%;
     }
@@ -18,17 +17,14 @@ def header(callback_function: callable) -> gr.Blocks:
         word-wrap: break-word;
         max-width: 150px; /* Adjust the max-width as per your requirement */
     }
-    </style>
-    """
-
-
+    </style>"""
     with gr.Blocks(
         theme=gr.themes.Default(
             primary_hue=gr.themes.colors.teal, secondary_hue=gr.themes.colors.cyan
         ),
         title="Ask us about Medical Research Papers!",
     ) as front_end:
-        gr.HTML("<img src='file/src/front_end/assets/background.png'>")
+        gr.HTML("<img src='file/src/front_end/assets/logo.png'>")
         gr.Markdown(
             """
             # Retrieve relevant research papers to your query
@@ -37,7 +33,8 @@ def header(callback_function: callable) -> gr.Blocks:
         textbox = gr.Textbox(label="Please enter your question:")
 
         
-        dropdown =gr.Dropdown(["Number of Participants", "Phase I Success Rate","Advantages/Disadvantages", "Study Type"], value=["Number of Participants"], multiselect=True, label="Activity", info="XXX")
+        #dropdown =gr.Dropdown(["Number of Participants", "Phase I Success Rate","Advantages/Disadvantages", "Study Type"], value=["Number of Participants"], multiselect=True, label="Activity", info="XXX")
+        dropdown =gr.Dropdown(allow_custom_value=True,  multiselect=True, label="Fields of Interest", info="Select fields to extract from papers ")
         
         with gr.Row():
             button1 = gr.Button("Submit", variant="primary")
@@ -46,9 +43,8 @@ def header(callback_function: callable) -> gr.Blocks:
             output_chat = gr.Textbox(label="Chat response:")
             output_summary = gr.Textbox(label="Summarisation:")
             
-            output_relevant_docs = gr.List(type="pandas", label="Relevant documents:")
+            output_relevant_docs = gr.List(type="pandas", label="Relevant documents:", column_widths=[10, 10, 10, 10, 10, 10, 10, 10, 10, 10], wrap=True)
         
-        gr.HTML(css)
 
         button1.click(
             callback_function,
